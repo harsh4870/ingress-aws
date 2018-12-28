@@ -23,4 +23,11 @@ Let’s understand this by setting up a fully functional nginx ingress controlle
 Setup of NGINX ingress controller
 Start by creating a namespace for the ingress controller to run in
 
+STEP : 1
 kubectl create -f namespace.yaml
+
+Step:2
+Then create the cluster role and role for the nginx ingress controller
+
+kubectl create -f rbac.yaml
+
