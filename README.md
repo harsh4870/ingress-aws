@@ -31,3 +31,44 @@ Then create the cluster role and role for the nginx ingress controller
 
 kubectl create -f rbac.yaml
 
+This will create the cluster role and role for the ingress controller. Then, write a configuration file for configuring your nginx proxy
+
+config_map:
+  data:
+    client-body-buffer-size: 32M
+    hsts: "true"
+    proxy-body-size: 1G
+    proxy-buffering: "false"
+    proxy-read-timeout: "600"
+    proxy-send-timeout: "600"
+    server-tokens: "false"
+    ssl-redirect: "false"
+    upstream-keepalive-connections: "50"
+    use-proxy-protocol: "true"
+  labels:
+    app: ingress-nginx
+  name: nginx-configuration
+  namespace: ingress-nginx
+  version: v1
+---
+config_map:
+  name: tcp-services
+  namespace: ingress-nginx
+  version: v1
+---
+config_map:
+  name: udp-services
+  namespace: ingress-nginx
+  version: v1
+Note the configuration set above. This is a standard config that has worked well for us.
+
+It is recommended to use HTTP Strict Transport Security (hsts). This, along with SSL redirects, are used to redirect HTTP requests to HTTPS. This is generally considered to be more secure. We recommend it unless your service specifically needs to terminate SSL itself.
+
+The other important option above is use-proxy-protocol. Since I’ll be setting up a L4 ELB loadbalancer (which does not forward SRC IP, SRC Port, SRC proto and other possibly important information to the services behind it) this option provides a mechanism to forward those L7 headers.
+
+Let’s create this config map
+
+$ short -k -f configmap.short.yaml > configmap.yaml
+$ kubectl create -f configmap.yaml
+Now that the configuration is ready to be used, we can start by creating the default backend. The default backend acts as a catch-all service. It is routed to whenever an unknown URL is requested from this proxy (i.e. the nginx proxy we’ll be running).
+
