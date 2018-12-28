@@ -1,4 +1,4 @@
-# ingress-aws
+# Kubernetes aws ingress controller-with aws ELB-ALB
 ingress-aws
 Consider an AWS setup with one EC2 instance backing a public-facing Elastic Load Balancer (ELB). The gateway for the traffic in this case would be the ELB. The gateway manager is the entity that configures the ELB and runs it.
 
